@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +9,6 @@ import 'package:sheek_bazar/firebase_options.dart';
 import 'package:sheek_bazar/kurdish_material.dart';
 import 'package:sheek_bazar/kurdish_widget.dart';
 import 'Locale/app_localization.dart';
-// import 'package:flutter_kurdish_localization/flutter_kurdish_localization.dart';
 import 'Locale/cubit/locale_cubit.dart';
 import 'bloc_provider.dart';
 import 'config/themes/app_themes.dart';
@@ -21,70 +18,95 @@ import 'injection_container.dart' as di;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-Future createChannel(AndroidNotificationChannel channel) async {
-  final FlutterLocalNotificationsPlugin plugin =
-      FlutterLocalNotificationsPlugin();
-  await plugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
+Future<void> createChannel(AndroidNotificationChannel channel) async {
+  final FlutterLocalNotificationsPlugin plugin = FlutterLocalNotificationsPlugin();
+  try {
+    await plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  } catch (e) {
+    logger.e("Failed to create notification channel: $e");
+  }
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Handle background message
+  logger.i("Handling a background message: ${message.messageId}");
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await di.init();
-  await CacheHelper.init();
-  final status = await Permission.notification.request();
+  await di.init(); // Initialize dependency injection
+  await CacheHelper.init(); // Initialize cache helper
+
+  // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  var token = await messaging.getToken();
-  await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true);
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings androidInitializationSettings =
-      AndroidInitializationSettings('@mipmap/launcher_icon');
-  const DarwinInitializationSettings darwinInitializationSettings =
-      DarwinInitializationSettings();
-  const InitializationSettings initializationSettings = InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: darwinInitializationSettings);
-  const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'messages', 'Messages',
-      description: 'this is flutter firebase', importance: Importance.max);
 
-  createChannel(channel);
-  flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  FirebaseMessaging.onMessage.listen((event) {
-    logger.i(event.notification);
+  // Set background messaging handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    final notification = event.notification;
+  // Initialize Firebase Messaging without requesting explicit permissions
+  await _setupFirebaseMessaging();
 
-    final android = event.notification?.android;
-    if (notification != null && android != null) {
-      flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
-              android: AndroidNotificationDetails(channel.id, channel.name,
-                  channelDescription: channel.description,
-                  icon: android.smallIcon)));
-    }
-  });
+  // Set preferred orientations and run the app
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
-  ]).then((value) => runApp(const MyApp()));
-  runApp(const MyApp());
+  ]).then((_) {
+    runApp(const MyApp());
+  });
+}
+
+Future<void> _setupFirebaseMessaging() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Retrieve APNS token (for iOS)
+  String? token = await messaging.getAPNSToken();
+  logger.i("APNS Token: $token");
+
+  // Initialize Local Notifications
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  const AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
+  const DarwinInitializationSettings darwinInitializationSettings = DarwinInitializationSettings();
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: androidInitializationSettings,
+    iOS: darwinInitializationSettings,
+  );
+
+  // Create Notification Channel
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'messages',
+    'Messages',
+    description: 'This is Flutter Firebase',
+    importance: Importance.max,
+  );
+
+  await createChannel(channel); // Ensure the channel is created
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings); // Initialize notifications
+
+  // Handle foreground messages
+  FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+    logger.i(event.notification);
+
+    final notification = event.notification;
+    final android = event.notification?.android;
+
+    if (notification != null && android != null) {
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            channelDescription: channel.description,
+            icon: android.smallIcon,
+          ),
+        ),
+      );
+    }
+  });
 }
 
 class MyApp extends StatefulWidget {

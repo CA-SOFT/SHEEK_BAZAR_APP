@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "248002072920",
+    "project_id": "sheek-bazar-1d2cf",
+    "storage_bucket": "sheek-bazar-1d2cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248002072920:android:ab48fa4ce49e7c5e5d552d",
+        "android_client_info": {
+          "package_name": "com.example.sheek_bazar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOkM1gYnrNS3HJp7SesY6PsWgXOldgBY8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

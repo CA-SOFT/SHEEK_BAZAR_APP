@@ -566,8 +566,12 @@ class AppConstant {
                   backgroundColor: AppColors.primaryColor,
                   padding: EdgeInsets.only(
                       bottom: 150.h, top: 50.h, left: 50.w, right: 50.w),
-                  content: Text('log_in_to_enjoy_these_benefits'.tr(context)),
-                  duration: const Duration(seconds: 2), // Optional duration
+                  content: Text( 
+                        'log_in_to_enjoy_these_benefits'.tr(context), 
+                        style: TextStyle(color: Colors.white), 
+                      ),
+                  duration: const Duration(seconds: 2), // Option
+
                 ),
               );
             },
