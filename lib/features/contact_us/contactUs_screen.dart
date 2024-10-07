@@ -26,6 +26,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     }
 
     Future<void> callNumber(String phoneNumber) async {
+      print("asd");
       const String url = 'tel:';
       if (await canLaunch(url + phoneNumber)) {
         await launch(url + phoneNumber);
@@ -49,6 +50,17 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
         await launch(url + emailAddress);
       } else {
         print('Failed to launch email for address $emailAddress');
+      }
+    }
+
+    Future<void> launchSocialMedia(String insta_link) async {
+      if (await canLaunch(insta_link)) {
+        await launch(
+          insta_link,
+          universalLinksOnly: true,
+        );
+      } else {
+        throw 'There was a problem to open the url: $insta_link';
       }
     }
 
@@ -79,7 +91,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
           ),
           AppConstant.customSizedBox(0, 50),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               BlocBuilder<ThemesCubit, ThemesState>(
                 builder: (context, theme) {
@@ -87,17 +99,40 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                       onTap: () async {
                         await openWhatsApp("+964750 290 7090");
                       },
-                      child: theme.mode == "dark"
-                          ? Image.asset(
-                              "assets/images/whatsapp_dark_mode.png",
-                              height: 125.h,
-                            )
-                          : Image.asset(
-                              "assets/images/whatsapp_logo.jpeg",
-                              height: 125.h,
-                            ));
+                      child: Image.asset(
+                        "assets/images/whatsapp_logo.png",
+                        height: 125.h,
+                      ));
                 },
               ),
+              InkWell(
+                  onTap: () async {
+                    await launchSocialMedia(
+                        "https://www.facebook.com/sheek.bazar");
+                  },
+                  child: Image.asset(
+                    "assets/images/facebook_icon.png",
+                    height: 125.h,
+                  )),
+              InkWell(
+                  onTap: () async {
+                    await launchSocialMedia(
+                        "https://www.tiktok.com/@sheek.bazar");
+                  },
+                  child: Image.asset(
+                    "assets/images/tiktok_icon.png",
+                    height: 125.h,
+                  )),
+              InkWell(
+                  onTap: () async {
+                    await launchSocialMedia(
+                        "https://www.instagram.com/sheek.bazar/");
+                  },
+                  child: Image.asset(
+                    "assets/images/insta_icon.png",
+                    height: 150.h,
+                    width: 150.w,
+                  )),
             ],
           ),
           AppConstant.customSizedBox(0, 50),

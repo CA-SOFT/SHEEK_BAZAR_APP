@@ -452,20 +452,10 @@ class FormContainerForSignUp extends StatelessWidget {
                                                                   MainAxisAlignment
                                                                       .spaceBetween,
                                                               children: [
-                                                                theme.mode ==
-                                                                        "dark"
-                                                                    ? Image
-                                                                        .asset(
-                                                                        "assets/images/whatsapp_dark_mode.png",
-                                                                        height:
-                                                                            100.h,
-                                                                      )
-                                                                    : Image
-                                                                        .asset(
-                                                                        "assets/images/whatsapp_logo.jpeg",
-                                                                        height:
-                                                                            100.h,
-                                                                      ),
+                                                                Image.asset(
+                                                                  "assets/images/whatsapp_logo.png",
+                                                                  height: 100.h,
+                                                                ),
                                                                 Text(
                                                                   "Whatsapp",
                                                                   style: TextStyle(

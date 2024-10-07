@@ -62,7 +62,7 @@
 //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //                         children: [
 //                           Image.asset(
-//                             "assets/images/whatsapp_logo.jpeg",
+//                             "assets/images/whatsapp_logo.png",
 //                             height: 100.h,
 //                           ),
 //                           Text(

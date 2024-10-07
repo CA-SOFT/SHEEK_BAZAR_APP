@@ -334,7 +334,7 @@ class _OnbordingState extends State<Onbording> {
                                   height: 125.w,
                                 ),
                                 SizedBox(
-                                  width: 175.w,
+                                  width: 225.w,
                                   height: 100.h,
                                   child: ElevatedButton(
                                     onPressed: () {

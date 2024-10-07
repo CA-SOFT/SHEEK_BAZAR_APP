@@ -543,7 +543,7 @@ class AuthCubit extends Cubit<AuthState> {
             Map<String, String> body = {};
             body['new_password'] = state.newPasswordForReset!;
             body['reset_password'] = "1";
-            body['user_id'] = state.userIdFromForgetPassword!;
+            body['user_phone'] = state.phoneNumberForResetPassword!;
 
             OperationsModel data =
                 await forgetPassswordRepo.resetPassword(body: body);

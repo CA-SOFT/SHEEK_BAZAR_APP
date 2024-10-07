@@ -543,15 +543,10 @@ class CustomBottomNavigation extends StatelessWidget {
                                                       .attachmentName ??
                                                   "");
                                     },
-                                    child: theme.mode == "dark"
-                                        ? Image.asset(
-                                            "assets/images/whatsapp_dark_mode.png",
-                                            height: 125.h,
-                                          )
-                                        : Image.asset(
-                                            "assets/images/whatsapp_logo.jpeg",
-                                            height: 125.h,
-                                          ));
+                                    child: Image.asset(
+                                      "assets/images/whatsapp_logo.png",
+                                      height: 125.h,
+                                    ));
                               },
                             ),
                             AppConstant.customSizedBox(25, 0),

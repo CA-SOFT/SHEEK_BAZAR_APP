@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, must_be_immutable
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +13,7 @@ import 'package:sheek_bazar/features/auth/presentation/pages/confirm_password_sc
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_constants.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:http/http.dart' as http;
 
 class ForgetPasswordScreen extends StatefulWidget {
   bool fromSignUp;
@@ -25,6 +28,14 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   void deactivate() {
     super.deactivate();
     context.read<AuthCubit>().clearForgetPasswordVar();
+  }
+
+  int? number;
+  void generateRandomNumber() async {
+    final random = Random();
+    setState(() {
+      number = 1000 + random.nextInt(9000);
+    });
   }
 
   @override
@@ -46,7 +57,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     ),
                   ],
                 ),
-                AppConstant.customSizedBox(0, 30),
+                AppConstant.customSizedBox(0, 50),
                 BlocBuilder<AuthCubit, AuthState>(
                   builder: (context, state) {
                     return TextFormField(
@@ -68,27 +79,60 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     );
                   },
                 ),
-                AppConstant.customSizedBox(0, 30),
+                AppConstant.customSizedBox(0, 50),
                 state.loading
                     ? AppConstant.customLoadingElvatedButton(context)
                     : AppConstant.customElvatedButton(context, "send",
                         () async {
-                        if (widget.fromSignUp) {
-                          await context
-                              .read<AuthCubit>()
-                              .onChangePhoneNumberForResetPassword(
-                                  state.phoneNumberForSignUp!);
+                        // print(state.phoneNumberForSignUp!);
+                        context.read<AuthCubit>().changeLoadingState(true);
+                        generateRandomNumber();
+
+                        var headers = {
+                          'Content-Type': 'application/x-www-form-urlencoded'
+                        };
+                        var request = http.Request(
+                            'POST',
+                            Uri.parse(
+                                'https://api.ultramsg.com/instance91486/messages/chat'));
+                        request.bodyFields = {
+                          'token': 'lctsc6l0fo7hoz8l',
+                          'to': state.phoneNumberForResetPassword!,
+                          'body': 'رمز التأكيد هو $number'
+                        };
+                        request.headers.addAll(headers);
+                        http.StreamedResponse response = await request.send();
+                        context.read<AuthCubit>().changeLoadingState(false);
+                        if (response.statusCode == 200) {
+                          print("Done");
                           context
                               .read<AuthCubit>()
-                              .sendSmS(context, fromSignUp: true);
+                              .changesendWhatsappSuccessfully();
                         } else {
-                          context.read<AuthCubit>().sendSmS(context);
+                          print("not done");
+
+                          print(response.reasonPhrase);
                         }
                       }),
+
+                //  AppConstant.customElvatedButton(context, "send",
+                //     () async {
+                //     if (widget.fromSignUp) {
+                //       await context
+                //           .read<AuthCubit>()
+                //           .onChangePhoneNumberForResetPassword(
+                //               state.phoneNumberForSignUp!);
+                //       context
+                //           .read<AuthCubit>()
+                //           .sendSmS(context, fromSignUp: true);
+                //     } else {
+                //       context.read<AuthCubit>().sendSmS(context);
+                //     }
+                //   }),
                 AppConstant.customSizedBox(0, 150),
                 const Divider(),
                 AppConstant.customSizedBox(0, 150),
-                state.sendSMSSuccessfully!
+                state.sendWhatsappSuccessfully!
                     ? Row(
                         children: [
                           Text(
@@ -100,56 +144,59 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                       )
                     : const SizedBox(),
                 AppConstant.customSizedBox(0, 30),
-                state.sendSMSSuccessfully!
-                    ? PinCodeTextField(
-                        keyboardType: TextInputType.number,
-                        appContext: context,
-                        length: 4,
-                        onChanged: (value) {},
-                        onCompleted: (value) {
-                          if (state.validationCode == value) {
-                            widget.fromSignUp
-                                ? context.read<AuthCubit>().SignUp(context)
-                                : AppConstant.customNavigation(context,
-                                    const ConfirmPasswordScreen(), -1, 0);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: AppColors.primaryColor,
-                                padding: EdgeInsets.only(
-                                    bottom: 150.h,
-                                    top: 50.h,
-                                    left: 50.w,
-                                    right: 50.w),
-                                content: Text(
-                                  'no_match_pin'.tr(context),
-                                  style: const TextStyle(color: Colors.red),
+                state.sendWhatsappSuccessfully!
+                    ? Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: PinCodeTextField(
+                          keyboardType: TextInputType.number,
+                          appContext: context,
+                          length: 4,
+                          onChanged: (value) {},
+                          onCompleted: (value) {
+                            if (number.toString() == value) {
+                              widget.fromSignUp
+                                  ? context.read<AuthCubit>().SignUp(context)
+                                  : AppConstant.customNavigation(context,
+                                      const ConfirmPasswordScreen(), -1, 0);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: AppColors.primaryColor,
+                                  padding: EdgeInsets.only(
+                                      bottom: 150.h,
+                                      top: 50.h,
+                                      left: 50.w,
+                                      right: 50.w),
+                                  content: Text(
+                                    'no_match_pin'.tr(context),
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
+                                  duration: const Duration(seconds: 2),
                                 ),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        },
-                        textStyle: TextStyle(
-                            color: AppColors.primaryColor,
-                            fontSize: 75.sp,
-                            fontWeight: FontWeight.bold),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        enableActiveFill: true,
-                        pinTheme: PinTheme(
-                            disabledColor: Colors.white,
-                            selectedFillColor: Colors.white,
-                            activeFillColor: Colors.white,
-                            inactiveFillColor: Colors.white,
-                            fieldHeight: 275.h,
-                            fieldWidth: 200.w,
-                            shape: PinCodeFieldShape.box,
-                            activeColor: AppColors.primaryColor,
-                            inactiveColor: AppColors.primaryColor,
-                            selectedColor: const Color.fromARGB(153, 0, 0, 0),
-                            borderRadius: BorderRadius.circular(8.sp)),
+                              );
+                            }
+                          },
+                          textStyle: TextStyle(
+                              color: AppColors.primaryColor,
+                              fontSize: 75.sp,
+                              fontWeight: FontWeight.bold),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          enableActiveFill: true,
+                          pinTheme: PinTheme(
+                              disabledColor: Colors.white,
+                              selectedFillColor: Colors.white,
+                              activeFillColor: Colors.white,
+                              inactiveFillColor: Colors.white,
+                              fieldHeight: 275.h,
+                              fieldWidth: 200.w,
+                              shape: PinCodeFieldShape.box,
+                              activeColor: AppColors.primaryColor,
+                              inactiveColor: AppColors.primaryColor,
+                              selectedColor: const Color.fromARGB(153, 0, 0, 0),
+                              borderRadius: BorderRadius.circular(8.sp)),
+                        ),
                       )
                     : const SizedBox(),
               ]),
