@@ -93,18 +93,6 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              BlocBuilder<ThemesCubit, ThemesState>(
-                builder: (context, theme) {
-                  return InkWell(
-                      onTap: () async {
-                        await openWhatsApp("+964750 290 7090");
-                      },
-                      child: Image.asset(
-                        "assets/images/whatsapp_logo.png",
-                        height: 125.h,
-                      ));
-                },
-              ),
               InkWell(
                   onTap: () async {
                     await launchSocialMedia(
@@ -144,8 +132,20 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
           ),
           AppConstant.customSizedBox(0, 50),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              BlocBuilder<ThemesCubit, ThemesState>(
+                builder: (context, theme) {
+                  return InkWell(
+                      onTap: () async {
+                        await openWhatsApp("+964750 290 7090");
+                      },
+                      child: Image.asset(
+                        "assets/images/whatsapp_logo.png",
+                        height: 125.h,
+                      ));
+                },
+              ),
               InkWell(
                   onTap: () async {
                     await callNumber("+964750 290 7090");
@@ -154,7 +154,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                     backgroundColor: AppColors.primaryColor,
                     child: Icon(Icons.call, color: AppColors.whiteColor),
                   )),
-              AppConstant.customSizedBox(50, 0),
+              // AppConstant.customSizedBox(50, 0),
               InkWell(
                   onTap: () async {
                     await launchMessage("+964750 290 7090");
