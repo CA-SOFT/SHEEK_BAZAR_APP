@@ -87,7 +87,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                         // print(state.phoneNumberForSignUp!);
                         context.read<AuthCubit>().changeLoadingState(true);
                         generateRandomNumber();
-
+                        // String phoneNumber = state.phoneNumberForResetPassword!;
+                        // if (phoneNumber.startsWith("07")) {
+                        //   phoneNumber = phoneNumber.replaceFirst("0", "+964");
+                        // }
+                        // print(phoneNumber);
+                        // print(state.phoneNumberForResetPassword!);
                         var headers = {
                           'Content-Type': 'application/x-www-form-urlencoded'
                         };

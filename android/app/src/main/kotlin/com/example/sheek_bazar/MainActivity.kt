@@ -1,4 +1,4 @@
-package com.example.sheek_bazar
+package com.sheek.bazar
 
 import io.flutter.embedding.android.FlutterActivity
 
