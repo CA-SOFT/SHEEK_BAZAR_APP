@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use, file_names, avoid_print
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,7 +22,19 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
   @override
   Widget build(BuildContext context) {
     Future<void> openWhatsApp(String whatsappNumber) async {
-      String url = Uri.encodeFull('https://wa.me/$whatsappNumber');
+      String url;
+      if (Platform.isAndroid) {
+        // add the [https]
+        url = Uri.encodeFull('https://wa.me/$whatsappNumber');
+
+        // return "https://wa.me/$phone/?text=${Uri.parse(message)}"; // new line
+      } else {
+        // add the [https]
+        url = Uri.encodeFull(
+            'https://api.whatsapp.com/send?phone=$whatsappNumber');
+
+        // return "https://api.whatsapp.com/send?phone=$phone=${Uri.parse(message)}"; // new line
+      }
       // Check if WhatsApp is installed
       await canLaunch(url) ? launch(url) : print('WhatsApp not installed');
     }
@@ -138,7 +152,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                 builder: (context, theme) {
                   return InkWell(
                       onTap: () async {
-                        await openWhatsApp("+964750 290 7090");
+                        await openWhatsApp("+9647502907090");
                       },
                       child: Image.asset(
                         "assets/images/whatsapp_logo.png",
